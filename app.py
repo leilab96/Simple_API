@@ -1,14 +1,15 @@
+import pickle
 from flask import Flask, render_template, jsonify, request
 
 app = Flask(__name__)
 
-projects = [{
-    'name': 'my first project',
-    'tasks': [{
-        'name': 'my first task',
-        'completed': False
-    }]
-}]
+
+# read projects from pickle file
+with open('projects.pickle', 'rb') as f:
+    projects = pickle.load(f)
+    
+
+
 
 
 @app.route("/")
@@ -18,9 +19,9 @@ def home():
 
 @app.route("/projects")
 def get_projects():
-  return jsonify({'projects': projects}), 200, {
+  return jsonify(projects), 200, {
       # add Access-Control-Allow-Origin header
-      'Access-Control-Allow-Origin': 'http://127.0.0.1:8080'
+      'Access-Control-Allow-Origin': '*'
   }
 
 
