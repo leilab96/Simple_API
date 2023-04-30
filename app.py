@@ -33,13 +33,15 @@ def create_project():
   return jsonify(new_project), 201
 
 
-@app.route("/project/<string:name>")
-def get_project(name):
-  print(name)
-  for project in projects:
-    if project['name'] == name:
-      return jsonify(project)
-  return jsonify({'message': 'project not found'}), 404
+#note: "projects" is a key itself too so the code will need some modifications for other functions too
+#get_project uses project_id to find the project
+@app.route("/project/<string:project_id>")
+def get_project(project_id):
+    for project in projects["projects"]:
+        if project['project_id'] == project_id:
+            return jsonify(project)
+    return jsonify({'message': 'project not found'}), 404
+
 
 
 @app.route("/project/<string:name>/tasks")
@@ -65,4 +67,3 @@ def add_task_to_project(name):
       }
       project['tasks'].append(new_task)
       return jsonify(new_task), 201
-  return jsonify({'message': 'project not found'}), 404
