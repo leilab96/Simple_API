@@ -67,3 +67,4 @@ def add_task_to_project(name):
       }
       project['tasks'].append(new_task)
       return jsonify(new_task), 201
+  return jsonify({'message': 'project not found'}), 404
