@@ -73,6 +73,21 @@ def get_project(project_id):
         if project['project_id'] == project_id:
             return jsonify(project)
     return jsonify({'message': 'project not found'}), 404
+  
+  
+#change projects key "complete" to true and saves it 
+@app.route("/project/<string:project_id>/complete", methods=['POST'])
+def complete_project(project_id):
+    for project in projects["projects"]:
+        if project['project_id'] == project_id:
+            if project['completed']:
+                return '', 200
+            else:
+                project['completed'] = True
+                save_data(projects)
+                return jsonify(project), 200
+    return jsonify({'message': 'project not found'}), 404
+  
 
 
 
