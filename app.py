@@ -1,16 +1,23 @@
+import uuid
 import pickle
 from flask import Flask, render_template, jsonify, request
 
 app = Flask(__name__)
 
-
-# read projects from pickle file
-with open('projects.pickle', 'rb') as f:
-    projects = pickle.load(f)
     
+def load_data():
+    with open('projects.pickle', 'rb') as f:
+        data = pickle.load(f)
+    return data
 
+# save projects to pickle file
+def save_data(data):
+    with open('projects.pickle', 'wb') as f:
+        pickle.dump(data, f)
 
+projects= load_data()
 
+    
 
 @app.route("/")
 def home():
@@ -25,12 +32,37 @@ def get_projects():
   }
 
 
+ #create projects modified, it saves the added project into the pickle file
 @app.route("/project", methods=['POST'])
 def create_project():
-  request_data = request.get_json()
-  new_project = {'name': request_data['name'], 'tasks': request_data['tasks']}
-  projects.append(new_project)
-  return jsonify(new_project), 201
+    request_data = request.get_json()
+    new_project_id = uuid.uuid4().hex[:24]
+    new_project = {
+        'name': request_data['name'],
+        'creation_date': request_data['creation_date'],
+        'completed': request_data['completed'],
+        'tasks': []
+    }
+    for task in request_data['tasks']:
+        new_task_id = uuid.uuid4().hex[:24]
+        new_task = {
+            'name': task['name'],
+            'completed': task['completed'],
+            'task_id': new_task_id,
+            'checklist': []
+        }
+        for item in task['checklist']:
+            new_checklist_id = uuid.uuid4().hex[:24]
+            new_item = {
+                'name': item['name'],
+                'completed': item['completed'],
+                'checklist_id': new_checklist_id
+            }
+            new_task['checklist'].append(new_item)
+        new_project['tasks'].append(new_task)
+    projects['projects'].append(new_project)
+    save_data(projects)
+    return jsonify({ 'message': f'project created with id: {new_project_id}' }), 201
 
 
 #note: "projects" is a key itself too so the code will need some modifications for other functions too
@@ -68,3 +100,5 @@ def add_task_to_project(name):
       project['tasks'].append(new_task)
       return jsonify(new_task), 201
   return jsonify({'message': 'project not found'}), 404
+
+
